@@ -1,0 +1,6 @@
+[FORMAT]
+
+max-line-length=100
+indent-string='  '
+no-space-check=trailing-comma,dict-separator
+good-names=i,j,f,ip
