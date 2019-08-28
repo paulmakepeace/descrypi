@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+
+"""Check that the Raspberry Pi folks haven't registered another MAC prefix."""
+
+import executable
+import descrypi.ieee_ra
+
+def main():
+  """Main entry point for check_rpi_macs."""
+  changes = descrypi.ieee_ra.check_ieee_macs()
+  if not changes:
+    print("Raspberry Pi MAC prefixes up-to-date!")
+  else:
+    print("Raspberry Pi MAC prefixes have changed to %s! Please file an issue." % changes)
+
+if __name__ == '__main__':
+  main()

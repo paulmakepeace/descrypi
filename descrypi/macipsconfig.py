@@ -1,7 +1,9 @@
+"""class MACIPsConfig."""
+
 import os.path
 import json
 
-class MACIPsConfig:
+class MACIPsConfig():
   """MAC -> IP database.
 
   This class maintains a JSON file of the MAC -> IP mappings between runs. Once a MAC is found,

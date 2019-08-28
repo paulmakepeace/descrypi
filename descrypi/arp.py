@@ -27,10 +27,10 @@ RASPBERRY_PI_MACS_RE = re.compile(
 )
 
 def find_mac_ips():
-  """Run `arp -a` and return array of (IP, MAC address) tuples."""
+  """Run `arp -a` and return array of (MAC address, IP) tuples."""
   mac_ips = []
-  arp_response = subprocess.Popen(ARP_COMMAND, stdout=subprocess.PIPE).stdout.readlines()
-  for line in arp_response:
+  arp = subprocess.Popen(ARP_COMMAND, stdout=subprocess.PIPE).stdout.readlines()
+  for line in arp:
     match = ARP_LINE_RE.search(line.decode())
     if match:
       mac_ips.append((match.group('mac'), match.group('ip')))
