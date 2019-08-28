@@ -18,6 +18,7 @@ Restricted to IPv4 for now.
 import ipaddress
 import re
 import subprocess
+import shutil
 import sys
 
 # Linux: inet 169.254.46.250  netmask 255.255.0.0  broadcast 169.254.255.255
@@ -67,4 +68,7 @@ def fping_interface(interface):
   print("Host(s) up:", ", ".join(run_fping(cidr_for_interface(interface))))
 
 if __name__ == '__main__':
+  if not shutil.which("fping"):
+    sys.stderr.write("Missing `fping`. Try `brew install fping`, `apt-get install fping`, etc\n")
+    sys.exit(1)
   fping_interface(sys.argv[1] if len(sys.argv) > 1 else "en1")
