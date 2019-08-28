@@ -12,7 +12,7 @@ without getting into platform switching.
 import re
 import subprocess
 
-import ieee_ra
+import descrypi.ieee_ra
 import descrypi.macipsconfig
 
 # -a shows the current table. -n skips reverse DNS lookup (no use for name)
@@ -28,7 +28,7 @@ ARP_LINE_RE = re.compile(
 
 # Regex to filter RPi MACs
 RASPBERRY_PI_MACS_RE = re.compile(
-    r'^(' + "|".join(ieee_ra.RASPBERRY_PI_MACS) + r'):',
+    r'^(' + "|".join(descrypi.ieee_ra.RASPBERRY_PI_MACS) + r'):',
     re.IGNORECASE
 )
 
