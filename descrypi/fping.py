@@ -66,7 +66,7 @@ def fping(interface):
   return run_fping(cidr_for_interface(interface))
 
 def ping(hosts):
-  """Ping the hosts using fping."""
+  """Ping 'hosts' using fping."""
   process = subprocess.Popen(["fping"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
   with process.stdin as f:
