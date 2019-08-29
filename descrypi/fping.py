@@ -6,7 +6,7 @@ This is useful if the ARP cache expires: by pinging all addresses on an
 interface any devices that respond will have their MAC address recorded
 for descrypi to find.
 
-Usage: python3 fping.py eth0
+Usage: descrypi scan eth0
 
 We rely on `fping` to do the actual pinging. This wrapper takes an interface
 name and constructs a command line to perform the ping with the least
@@ -18,8 +18,6 @@ Restricted to IPv4 for now.
 import ipaddress
 import re
 import subprocess
-import shutil
-import sys
 
 # Linux: inet 169.254.46.250  netmask 255.255.0.0  broadcast 169.254.255.255
 # macOS: inet 169.254.201.244 netmask 0xffff0000 broadcast 169.254.255.255
@@ -51,10 +49,10 @@ def run_fping(network):
   """
 
   command = (FPING_COMMAND % network).split()
-  fping = subprocess.Popen(
+  response = subprocess.Popen(
       command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout.readlines()
   alive = []
-  for line in (line.decode() for line in fping):
+  for line in (line.decode() for line in response):
     if "xmt" not in line:
       continue
     line = line.split()
@@ -63,12 +61,6 @@ def run_fping(network):
       alive.append(ip_address)
   return alive
 
-def fping_interface(interface):
-  """Main entry point: fping the interface and report 'up' hosts."""
-  print("Host(s) up:", ", ".join(run_fping(cidr_for_interface(interface))))
-
-if __name__ == '__main__':
-  if not shutil.which("fping"):
-    sys.stderr.write("Missing `fping`. Try `brew install fping`, `apt-get install fping`, etc\n")
-    sys.exit(1)
-  fping_interface(sys.argv[1] if len(sys.argv) > 1 else "en1")
+def fping(interface):
+  """Return list of responsive IP addresses on the interface."""
+  return run_fping(cidr_for_interface(interface))

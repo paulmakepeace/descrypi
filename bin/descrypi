@@ -6,23 +6,67 @@ Descry Pi
 Find Raspberry Pis on the network by examining `arp` responses.
 """
 
-import executable
+import argparse
+import shutil
+import sys
 
-import descrypi.arp
-import descrypi.ieee_ra
-import descrypi.macipsconfig
+import executable # tweak sys.path to find descrypi module
 
-def main():
+from descrypi import arp
+from descrypi import fping
+from descrypi import ieee_ra
+from descrypi import macipsconfig
+
+
+def find(_args):
   """Main entry point for descrypi."""
 
-  mac_ip_config = descrypi.macipsconfig.MACIPsConfig()
-  mac_ips = descrypi.arp.filter_mac_ips(descrypi.arp.find_mac_ips())
+  mac_ip_config = macipsconfig.MACIPsConfig()
+  mac_ips = arp.filter_mac_ips(arp.find_mac_ips())
   changes = mac_ip_config.record(mac_ips)
 
   print("MAC -> IPs of Pis:")
   for mac, ip, new, updated in changes:
     print("%s -> %s %s%s" % (
         mac, ip, ("(new!) " if new else ""), ("updated to %s!" % updated if updated else "")))
+
+
+def scan(args):
+  """Main entry point: fping the interface and report 'up' hosts."""
+  if not shutil.which("fping"):
+    sys.stderr.write("Missing `fping`. Try `brew install fping`, `apt-get install fping`, etc\n")
+    sys.exit(1)
+  print("Host(s) up:", ", ".join(fping.fping(args.interface)))
+
+
+def check_ieee_macs(_args):
+  """Check that the Raspberry Pi folks haven't registered another MAC prefix."""
+  changes = ieee_ra.check_ieee_macs()
+  if not changes:
+    print("Raspberry Pi MAC prefixes up-to-date!")
+  else:
+    print("Raspberry Pi MAC prefixes have changed to %s! Please file an issue." % changes)
+
+
+def main():
+  """Main."""
+  parser = argparse.ArgumentParser()
+  subparsers = parser.add_subparsers()
+
+  subparser = subparsers.add_parser('find')
+  subparser.set_defaults(func=find)
+  parser.set_defaults(func=find)
+
+  subparser = subparsers.add_parser('scan')
+  subparser.add_argument('interface')
+  subparser.set_defaults(func=scan)
+
+  subparser = subparsers.add_parser('check_ieee_macs')
+  subparser.set_defaults(func=check_ieee_macs)
+
+  args = parser.parse_args()
+  args.func(args)  # call the default function
+
 
 if __name__ == '__main__':
   main()
