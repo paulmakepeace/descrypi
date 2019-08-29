@@ -29,7 +29,7 @@ def find(_args):
   for mac, ip, new, assigned in changes:
     print("%s -> %s %s%s" % (
         mac, ip, ("(new!) " if new else ""), ("assigned to %s!" % assigned if assigned else "")))
-  else:
+  if len(changes) == 0:
     print("None found. Try running the 'scan' command.")
 
 
