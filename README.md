@@ -23,24 +23,34 @@ It also uses `arp` but you almost certainly have that. (If not, it's in the Linu
 ```shell
 git clone git@github.com:paulmakepeace/descrypi.git
 cd descrypi
-# Run any of the bin/* programs
+# Run bin/descrypi
 ```
 
 ## Flow
 
-First, run `bin/fping eth0` (or `en0` on macOS) or whichever interface your Pi is hanging out at. You don't strictly need to do this if your Pi and workstation have been in communication recently but the network (ARP) cache can expire so this will refresh it.
+### Scan
+
+First, run `bin/descrypi scan eth0` (or `en0` on macOS) or whichever interface your Pi is hanging out at. You don't strictly need to do this if your Pi and workstation have been in communication recently but the network (ARP) cache can expire so this will refresh it.
+
+### Find
 
 Then run `bin/descrypi` to find your Pi(s)!
 
 This should report newly found Pi(s) and create a database, `mac_ips.json`. Next time you run `bin/descrypi` it'll recognize that MAC->IP mapping.
 
+### Assign
+
 Next, if you want to assign a static IP to the machines update the IP addresses in `mac_ips.json`. Running `bin/descrypi` should report that the IP is updated and won't overwrite it.
 
 A future feature will actually connect to the Pi and assign this address.
 
+### Ping
+
+`bin/descrypi ping` will ping Pi(s) in the `mac_ips.json` database.
+
 ## Other Tools
 
-`bin/check_rpi_macs` will check whether there are new Raspberry Pi MAC prefixes registered with the [IEEE Registration Authority](https://regauth.standards.ieee.org/standards-ra-web/pub/view.html#registries). Realistically you never need to run this but I included this as it's quite interesting to know that there is a query-able database of Raspberry Pi MAC prefixes :-)
+`bin/descrypi check_ieee_macs` will check whether there are new Raspberry Pi MAC prefixes registered with the [IEEE Registration Authority](https://regauth.standards.ieee.org/standards-ra-web/pub/view.html#registries). Realistically you never need to run this but I included this as it's quite interesting to know that there is a query-able database of Raspberry Pi MAC prefixes :-)
 
 ## To Do
 
