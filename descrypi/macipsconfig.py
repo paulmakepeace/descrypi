@@ -7,11 +7,12 @@ class MACIPsConfig():
   """MAC -> IP database.
 
   This class maintains a JSON file of the MAC -> IP mappings between runs. Once a MAC is found,
-  its IP is recorded. It's then possible to update this IP address for later assignment on the
+  its IP is recorded. It's then possible to assign a specific IP address for later assignment on the
   machine.
   """
 
   MAC_IPS_JSON_FILE = "mac_ips.json"
+  IP_NOT_SET = 'Set this for a static IP'
 
   def __init__(self):
     self.file = self.MAC_IPS_JSON_FILE
@@ -32,16 +33,18 @@ class MACIPsConfig():
   def record(self, mac_ips):
     """Record the latest scan with the existing database.
 
-    Return a list of changes where 'new' is previously unseen MAC and 'updated' is if the existing
-    database has an IP that isn't what's found. This use case is for assigning a new address to a
-    MAC. In this case, we don't update the database.
+    Return a list of changes where 'new' is previously unseen MAC and 'assigned' is if the existing
+    database has a manually assigned IP. In this case, we don't update the database.
     """
     changes = []
     for mac, ip in mac_ips:
-      new = mac not in self.config
-      updated = mac in self.config and self.config[mac] != ip and self.config[mac]
-      changes.append((mac, ip, new, updated))
-      if not updated:
-        self.config[mac] = ip
+      if mac in self.config:
+        new = False
+        assigned = self.config[mac]['assigned'] != self.IP_NOT_SET and self.config[mac]['assigned']
+      else:
+        new, assigned = True, False
+      changes.append((mac, ip, new, assigned))
+      if not assigned:
+        self.config[mac] = { 'current': ip, 'assigned': self.IP_NOT_SET }
     self.write()
     return changes
