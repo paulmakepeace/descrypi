@@ -64,3 +64,12 @@ def run_fping(network):
 def fping(interface):
   """Return list of responsive IP addresses on the interface."""
   return run_fping(cidr_for_interface(interface))
+
+def ping(hosts):
+  """Ping the hosts using fping."""
+  process = subprocess.Popen(["fping"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT)
+  with process.stdin as f:
+    f.write("\n".join(hosts).encode())
+  lines = (line.decode() for line in process.stdout.readlines())
+  return (line.split()[0] for line in lines if "is alive" in line)

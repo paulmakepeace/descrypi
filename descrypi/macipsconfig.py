@@ -19,7 +19,7 @@ class MACIPsConfig():
     self.config = {}
     self.load()
 
-  def write(self):
+  def dump(self):
     """Write out the database."""
     with open(self.file, "w") as f:
       json.dump(self.config, f, indent=4)
@@ -27,7 +27,7 @@ class MACIPsConfig():
   def load(self):
     """Load JSON MAC -> IP assignments."""
     if not os.path.exists(self.file):
-      self.write()
+      self.dump()
     self.config = json.load(open(self.file))
 
   def record(self, mac_ips):
@@ -45,6 +45,10 @@ class MACIPsConfig():
         new, assigned = True, False
       changes.append((mac, ip, new, assigned))
       if not assigned:
-        self.config[mac] = { 'current': ip, 'assigned': self.IP_NOT_SET }
-    self.write()
+        self.config[mac] = {'current': ip, 'assigned': self.IP_NOT_SET}
+    self.dump()
     return changes
+
+  def current_hosts(self):
+    """Return a list of current hosts."""
+    return [ip['current'] for ip in self.config.values()]

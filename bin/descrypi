@@ -19,7 +19,7 @@ from descrypi import macipsconfig
 
 
 def find(_args):
-  """Main entry point for descrypi."""
+  """Main entry point for descrypi: find Pi(s)!"""
 
   mac_ip_config = macipsconfig.MACIPsConfig()
   mac_ips = arp.filter_mac_ips(arp.find_mac_ips())
@@ -32,12 +32,16 @@ def find(_args):
 
 
 def scan(args):
-  """Main entry point: fping the interface and report 'up' hosts."""
+  """fping the interface and report 'up' hosts."""
   if not shutil.which("fping"):
     sys.stderr.write("Missing `fping`. Try `brew install fping`, `apt-get install fping`, etc\n")
     sys.exit(1)
   print("Host(s) up:", ", ".join(fping.fping(args.interface)))
 
+def ping(_args):
+  """fping the known Pi hosts and report who's 'up'."""
+  mac_ip_config = macipsconfig.MACIPsConfig()
+  print("Host(s) up:", ", ".join(fping.ping(mac_ip_config.current_hosts())))
 
 def check_ieee_macs(_args):
   """Check that the Raspberry Pi folks haven't registered another MAC prefix."""
@@ -60,6 +64,9 @@ def main():
   subparser = subparsers.add_parser('scan')
   subparser.add_argument('interface')
   subparser.set_defaults(func=scan)
+
+  subparser = subparsers.add_parser('ping')
+  subparser.set_defaults(func=ping)
 
   subparser = subparsers.add_parser('check_ieee_macs')
   subparser.set_defaults(func=check_ieee_macs)
