@@ -26,9 +26,11 @@ def find(_args):
   changes = mac_ip_config.record(mac_ips)
 
   print("MAC -> IPs of Pis:")
-  for mac, ip, new, updated in changes:
+  for mac, ip, new, assigned in changes:
     print("%s -> %s %s%s" % (
-        mac, ip, ("(new!) " if new else ""), ("updated to %s!" % updated if updated else "")))
+        mac, ip, ("(new!) " if new else ""), ("assigned to %s!" % assigned if assigned else "")))
+  else:
+    print("None found. Try running the 'scan' command.")
 
 
 def scan(args):
