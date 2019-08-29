@@ -15,30 +15,12 @@ amount of traffic (AFAIK), as quickly as possible without requiring root.
 Restricted to IPv4 for now.
 """
 
-import ipaddress
-import re
 import subprocess
 
-# Linux: inet 169.254.46.250  netmask 255.255.0.0  broadcast 169.254.255.255
-# macOS: inet 169.254.201.244 netmask 0xffff0000 broadcast 169.254.255.255
-NETWORK_RE = re.compile(r'netmask\s+(?P<netmask>\S+)\s+broadcast\s+(?P<broadcast>\S+)')
+import descrypi.network
 
 # Minimize packet size; only send one; single retry; quick timeout; 1ms between pings
 FPING_COMMAND = "fping --size 40 --count 1 --retry 1 --timeout=50 --interval 1 --generate %s"
-
-def cidr_for_interface(interface):
-  """Return the CIDR network address for a given interface."""
-  ifconfig = subprocess.Popen(["ifconfig", interface], stdout=subprocess.PIPE).stdout.read()
-  match = NETWORK_RE.search(ifconfig.decode())
-  if match:
-    netmask, broadcast = match.group('netmask'), match.group('broadcast')
-  else:
-    return None
-
-  if netmask[0:2] == '0x':
-    netmask = bin(int(netmask, 16)).count("1")
-
-  return str(ipaddress.IPv4Network("%s/%s" % (broadcast, netmask), strict=False))
 
 def run_fping(network):
   """Execute `fping` and return alive hosts.
@@ -63,7 +45,7 @@ def run_fping(network):
 
 def fping(interface):
   """Return list of responsive IP addresses on the interface."""
-  return run_fping(cidr_for_interface(interface))
+  return run_fping(descrypi.network.subnet_for_interface(interface))
 
 def ping(hosts):
   """Ping 'hosts' using fping."""
