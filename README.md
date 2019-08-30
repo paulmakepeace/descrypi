@@ -1,6 +1,6 @@
 # Descry Pi
 
-Find ("descry") freshly installed Raspberry Pi's on your network!
+Find ("descry") freshly installed Raspberry Pi(s) on your network!
 
 This toolset aims to be easier than using `fing` and, ultimately, more useful.
 
@@ -28,15 +28,25 @@ cd descrypi
 
 ## Flow
 
+### Networks
+
+First, figure out what local networks are available on your workstation and so where your Pi(s) are connected. You'll need this to direct your scans for Pi(s).
+
+```shell
+bin/descrypi networks
+```
+
+You're interested in the local networks at this stage. Pick out the name of the hardware interface listed in the first column, e.g. eth0, en0, bridge100, etc.
+
 ### Scan
 
-First, run `bin/descrypi scan eth0` (or `en0` on macOS) or whichever interface your Pi is hanging out at. You don't strictly need to do this if your Pi and workstation have been in communication recently but the network (ARP) cache can expire so this will refresh it.
+To scan for machines, run `bin/descrypi scan <interface>`. You don't strictly need to do this if your Pi and workstation have been in communication recently but the network (ARP) cache can expire so this will refresh it.
 
 ### Find
 
 Then run `bin/descrypi` to find your Pi(s)!
 
-This should report newly found Pi(s) and create a database, `mac_ips.json`. Next time you run `bin/descrypi` it'll recognize that MAC->IP mapping.
+This should report newly found Pi(s) and create a database, `mac_ips.json`. Next time you run `bin/descrypi` it'll recognize that MAC-to-IP mapping.
 
 ### Assign
 

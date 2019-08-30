@@ -15,6 +15,7 @@ import executable # tweak sys.path to find descrypi module
 from descrypi import arp
 from descrypi import fping
 from descrypi import ieee_ra
+from descrypi import network
 from descrypi import macipsconfig
 
 
@@ -40,10 +41,32 @@ def scan(args):
     sys.exit(1)
   print("Host(s) up:", ", ".join(fping.fping(args.interface)))
 
+
 def ping(_args):
   """fping the known Pi hosts and report who's 'up'."""
   mac_ip_config = macipsconfig.MACIPsConfig()
   print("Host(s) up:", ", ".join(fping.ping(mac_ip_config.current_hosts())))
+
+
+def print_network(interface, host, subnet, gateway):
+    print("%10s %15s %18s %15s" % (interface, host, subnet, gateway))
+
+def networks(_args):
+  """Dump known local and remote network configs."""
+  print("Local network configs:")
+  print_network("Interface", "Host", "Subnet", "Gateway")
+  for config in network.local_ip_config():
+    print_network(*config)
+
+  print("\nRemote network configs:")
+  print_network("Interface", "Host", "Subnet", "Gateway")
+  mac_ip_config = macipsconfig.MACIPsConfig()
+  for host in mac_ip_config.current_hosts():
+    config = network.remote_ip_config(host)
+    if config is None:
+      continue
+    print_network(*config)
+
 
 def check_ieee_macs(_args):
   """Check that the Raspberry Pi folks haven't registered another MAC prefix."""
@@ -69,6 +92,9 @@ def main():
 
   subparser = subparsers.add_parser('ping')
   subparser.set_defaults(func=ping)
+
+  subparser = subparsers.add_parser('networks')
+  subparser.set_defaults(func=networks)
 
   subparser = subparsers.add_parser('check_ieee_macs')
   subparser.set_defaults(func=check_ieee_macs)
