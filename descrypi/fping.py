@@ -19,13 +19,14 @@ import subprocess
 
 import descrypi.network
 
-# Minimize packet size; only send one; single retry; quick timeout; 1ms between pings
-FPING_COMMAND = "fping --size 40 --count 1 --retry 1 --timeout=50 --interval 1 --generate %s"
+# Minimize packet size; only send two; single retry; quick timeout; 1ms between pings
+# The second packet can help if the computer is asleep.
+FPING_COMMAND = "fping --size 40 --count 2 --retry 1 --timeout=50 --interval 1 --generate %s"
 
 def run_fping(network):
   """Execute `fping` and return alive hosts.
 
-  A ICMP reply is reported as,
+  A ICMP reply (or not) is reported as,
   169.254.19.148  : xmt/rcv/%loss = 1/1/0%, min/avg/max = 0.25/0.25/0.25
   169.255.255.254 : xmt/rcv/%loss = 0/0/0%
   """
@@ -35,11 +36,12 @@ def run_fping(network):
       command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout.readlines()
   alive = []
   for line in (line.decode() for line in response):
-    if "xmt" not in line:
+    if "rcv" not in line:
       continue
     line = line.split()
     ip_address, result = line[0], line[4]
     if result[2] != "0": # rcv'ed something!
+      print("%s is alive" % ip_address)
       alive.append(ip_address)
   return alive
 
