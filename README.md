@@ -40,7 +40,7 @@ You're interested in the local networks at this stage. Pick out the name of the 
 
 ### Scan
 
-To scan for machines, run `bin/descrypi scan <interface>`. You don't strictly need to do this if your Pi and workstation have been in communication recently but the network (ARP) cache can expire so this will refresh it.
+To scan for machines, run `bin/descrypi scan [-i <interface>]`. You don't strictly need to do this if your Pi and workstation have been in communication recently but the network (ARP) cache can expire so this will refresh it.
 
 ### Find
 

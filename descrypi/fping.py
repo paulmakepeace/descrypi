@@ -6,7 +6,7 @@ This is useful if the ARP cache expires: by pinging all addresses on an
 interface any devices that respond will have their MAC address recorded
 for descrypi to find.
 
-Usage: descrypi scan eth0
+Usage: descrypi scan [-i <interface, e.g. eth0>]
 
 We rely on `fping` to do the actual pinging. This wrapper takes an interface
 name and constructs a command line to perform the ping with the least
@@ -17,13 +17,11 @@ Restricted to IPv4 for now.
 
 import subprocess
 
-import descrypi.network
-
 # Minimize packet size; only send two; single retry; quick timeout; 1ms between pings
 # The second packet can help if the computer is asleep.
 FPING_COMMAND = "fping --size 40 --count 2 --retry 1 --timeout=50 --interval 1 --generate %s"
 
-def run_fping(network):
+def fping(network):
   """Execute `fping` and return alive hosts.
 
   A ICMP reply (or not) is reported as,
@@ -44,10 +42,6 @@ def run_fping(network):
       print("%s is alive" % ip_address)
       alive.append(ip_address)
   return alive
-
-def fping(interface):
-  """Return list of responsive IP addresses on the interface."""
-  return run_fping(descrypi.network.subnet_for_interface(interface))
 
 def ping(hosts):
   """Ping 'hosts' using fping."""
