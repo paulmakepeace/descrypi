@@ -40,15 +40,25 @@ You're interested in the local networks at this stage. Pick out the name of the 
 
 ### Scan
 
-To scan for machines, run `bin/descrypi scan [-i <interface>]`. You don't strictly need to do this if your Pi and workstation have been in communication recently but the network (ARP) cache can expire so this will refresh it.
+To scan for machines,
+
+```shell
+bin/descrypi scan [-i <interface>]
+```
+
+You don't strictly need to do this if your Pi and workstation have been in communication recently but the network (ARP) cache can expire so this will refresh it.
 
 ### Find
 
-Then run `bin/descrypi` to find your Pi(s)!
+Then to find your Pi(s) run,
+
+ ```shell
+bin/descrypi
+ ````
 
 This should report newly found Pi(s) and create a database, `mac_ips.json`. Next time you run `bin/descrypi` it'll recognize that MAC-to-IP mapping.
 
-### Assign
+### Assign (TODO)
 
 Next, if you want to assign a static IP to the machines update the IP addresses in `mac_ips.json`. Running `bin/descrypi` should report that the IP is updated and won't overwrite it.
 
@@ -56,9 +66,29 @@ A future feature will actually connect to the Pi and assign this address.
 
 ### Ping
 
-`bin/descrypi ping` will ping Pi(s) in the `mac_ips.json` database.
+To ping Pi(s) in the `mac_ips.json` database,
+
+```shell
+bin/descrypi ping
+```
 
 ## Other Tools
+
+### SSH
+
+Handy command to `ssh` to the scanned hosts, e.g.,
+
+```shell
+bin/descrypi ssh uptime
+```
+
+To avoid `descrypi` attempting to parse argument flags, quote them, e.g.,
+
+```shell
+bin/descrypi ssh "ls -al"
+```
+
+### Check for new MAC prefixes
 
 `bin/descrypi check_ieee_macs` will check whether there are new Raspberry Pi MAC prefixes registered with the [IEEE Registration Authority](https://regauth.standards.ieee.org/standards-ra-web/pub/view.html#registries). Realistically you never need to run this but I included this as it's quite interesting to know that there is a query-able database of Raspberry Pi MAC prefixes :-)
 

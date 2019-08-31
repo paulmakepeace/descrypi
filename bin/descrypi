@@ -7,6 +7,7 @@ Find Raspberry Pis on the network by examining `arp` responses.
 """
 
 import argparse
+import re
 import shutil
 import sys
 
@@ -17,7 +18,7 @@ from descrypi import fping
 from descrypi import ieee_ra
 from descrypi import network
 from descrypi import macipsconfig
-
+from descrypi.ssh import ssh
 
 def find(_args):
   """Main entry point for descrypi: find Pi(s)!"""
@@ -46,8 +47,7 @@ def scan(args):
 
 def ping(_args):
   """fping the known Pi hosts and report who's 'up'."""
-  mac_ip_config = macipsconfig.MACIPsConfig()
-  print("Host(s) up:", ", ".join(fping.ping(mac_ip_config.current_hosts())))
+  print("Host(s) up:", ", ".join(fping.ping(macipsconfig.current_hosts())))
 
 
 def print_network(interface, host, subnet, gateway):
@@ -62,12 +62,20 @@ def networks(_args):
 
   print("\nRemote network configs:")
   print_network("Interface", "Host", "Subnet", "Gateway")
-  mac_ip_config = macipsconfig.MACIPsConfig()
-  for host in mac_ip_config.current_hosts():
+  for host in macipsconfig.current_hosts():
     interface = network.remote_interface(host)
     if interface is None:
       continue
     print_network(interface.name, interface.ip, interface.network, interface.gateway)
+
+
+def ssh_all_hosts(args):
+  """Run args.command on all known hosts.
+
+  To avoid this program attempting to parse flags you'll need to quote e.g. ssh "ls -l"
+  """
+  for host in macipsconfig.current_hosts():
+    print(re.sub(r"^", "[%s] " % host, ssh(host, args.command), flags=re.MULTILINE))
 
 
 def check_ieee_macs(_args):
@@ -97,6 +105,10 @@ def main():
 
   subparser = subparsers.add_parser('networks')
   subparser.set_defaults(func=networks)
+
+  subparser = subparsers.add_parser('ssh')
+  subparser.add_argument('command', nargs='*')
+  subparser.set_defaults(func=ssh_all_hosts)
 
   subparser = subparsers.add_parser('check_ieee_macs')
   subparser.set_defaults(func=check_ieee_macs)
