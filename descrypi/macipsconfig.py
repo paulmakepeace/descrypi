@@ -3,7 +3,7 @@
 import os.path
 import json
 
-class MACIPsConfig():
+class MACIPsConfig:
   """MAC -> IP database.
 
   This class maintains a JSON file of the MAC -> IP mappings between runs. Once a MAC is found,
@@ -52,3 +52,7 @@ class MACIPsConfig():
   def current_hosts(self):
     """Return a list of current hosts."""
     return [ip['current'] for ip in self.config.values()]
+
+def current_hosts():
+  """Shortcut to return all known hosts."""
+  return MACIPsConfig().current_hosts()
