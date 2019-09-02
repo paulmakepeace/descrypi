@@ -24,7 +24,7 @@ def find(_args):
   """Main entry point for descrypi: find Pi(s)!"""
 
   mac_ip_config = macipsconfig.MACIPsConfig()
-  mac_ips = arp.filter_mac_ips(arp.find_mac_ips())
+  mac_ips = arp.find_pi_mac_ips()
   changes = mac_ip_config.record(mac_ips)
 
   print("MAC -> IPs of Pis:")
@@ -40,8 +40,7 @@ def scan(args):
   if not shutil.which("fping"):
     sys.stderr.write("Missing `fping`. Try `brew install fping`, `apt-get install fping`, etc\n")
     sys.exit(1)
-  interfaces = network.local_interfaces(args.interface)
-  for interface in interfaces:
+  for interface in network.local_interfaces(args.interface):
     print("Host(s) up on %s:" % interface.name)
     print(", ".join(fping.fping(interface.network)))
 

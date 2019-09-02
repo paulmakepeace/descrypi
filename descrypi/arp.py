@@ -16,26 +16,22 @@ ARP_COMMAND = "arp -n -a".split()
 # interesting part is the same.
 # ? (169.254.201.244) at 00:3e:e1:c7:3b:26 [ether] on eth0
 # ? (169.254.46.250) at dc:a6:32:19:1d:88 on en1 [ethernet]
-ARP_LINE_RE = re.compile(
-    r'^\S+ \((?P<ip>[^)]+)\) at (?P<mac>(?:[0-9a-f]{1,2}:){5}(?:[0-9a-f]{1,2}))'
-)
 
-# Regex to filter RPi MACs
-RASPBERRY_PI_MACS_RE = re.compile(
-    r'^(' + "|".join(descrypi.ieee_ra.RASPBERRY_PI_MACS) + r'):',
-    re.IGNORECASE
-)
+# Regex to filter MAC suffix, e.g., "12:ab:9", and RPi MACs
+MAC_OCTET_TRIPLE_RE = ':'.join([r'[0-9a-f]{1,2}'] * 3)
+MAC_PI_PREFIX_RE = '|'.join(descrypi.ieee_ra.RASPBERRY_PI_MACS)
 
-def find_mac_ips():
-  """Run `arp -a` and return array of (MAC address, IP) tuples."""
-  mac_ips = []
-  arp = subprocess.Popen(ARP_COMMAND, stdout=subprocess.PIPE).stdout.readlines()
-  for line in arp:
-    match = ARP_LINE_RE.search(line.decode())
-    if match:
-      mac_ips.append((match.group('mac'), match.group('ip')))
-  return mac_ips
+def raspberry_pi_macs_re():
+  """Return a regex that'll match a Pi line from `arp -a`."""
+  return re.compile(r"""
+                    ^\S+[ ]
+                    \((?P<ip>[^)]+)\)
+                    [ ]at[ ]
+                    (?P<mac>(?:{prefix}):(?:{rest}))
+                    """.format(prefix=MAC_PI_PREFIX_RE, rest=MAC_OCTET_TRIPLE_RE),
+                    re.MULTILINE | re.IGNORECASE | re.VERBOSE)
 
-def filter_mac_ips(mac_ips, filter_re=RASPBERRY_PI_MACS_RE):
-  """Apply the filter_re regex to the MAC address and return matching subset."""
-  return [(mac, ip) for (mac, ip) in mac_ips if filter_re.search(mac)]
+def find_pi_mac_ips():
+  """Run `arp -a` and return array of (Pi MAC address, IP) tuples."""
+  arp = subprocess.Popen(ARP_COMMAND, stdout=subprocess.PIPE).stdout.read().decode()
+  return [(m.group('mac'), m.group('ip')) for m in raspberry_pi_macs_re().finditer(arp)]
