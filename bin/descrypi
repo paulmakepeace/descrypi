@@ -20,45 +20,51 @@ from descrypi import network
 from descrypi import macipsconfig
 from descrypi.ssh import ssh
 
-def find(_args):
-  """Main entry point for descrypi: find Pi(s)!"""
+def find(args):
+  """Main entry point for descrypi: find Pi(s)!
+
+  This scans all local IPv4 networks, then examines the ARP table looking for Pi(s)."""
+
+  scan(args.interface, args.progress)
 
   mac_ip_config = macipsconfig.MACIPsConfig()
   mac_ips = arp.find_pi_mac_ips()
   changes = mac_ip_config.record(mac_ips)
 
-  print("MAC -> IPs of Pis:")
-  for mac, ip, new, assigned in changes:
-    print("%s -> %s %s%s" % (
-        mac, ip, ("(new!) " if new else ""), ("assigned to %s!" % assigned if assigned else "")))
-  if len(changes) == 0:
-    print("None found. Try running the 'scan' command.")
+  if changes:
+    print("Found these Pi(s):")
+    for mac, ip, new, assigned in changes:
+      print("%15s %19s %s%s" % (
+          ip, '(' + mac + ')',
+          ("(new!) " if new else ""),
+          ("assigned to %s!" % assigned if assigned else "")))
+  else:
+    print("No Pi(s) found.")
 
-
-def scan(args):
+def scan(interface, progress=False):
   """fping the interface and report 'up' hosts."""
   if not shutil.which("fping"):
     sys.stderr.write("Missing `fping`. Try `brew install fping`, `apt-get install fping`, etc\n")
     sys.exit(1)
-  for interface in network.local_interfaces(args.interface):
-    print("Host(s) up on %s:" % interface.name)
-    print(", ".join(fping.fping(interface.network)))
+  for i in network.local_interfaces(interface):
+    print("Pinging %s (%s) ..." % (i.name, i.network))
+    fping.fping(i.network, progress=progress)
 
 def ping(_args):
   """fping the known Pi hosts and report who's 'up'."""
-  print("Host(s) up:", ", ".join(fping.ping(macipsconfig.current_hosts())))
+  print("Pinging: ", ", ".join(fping.ping(macipsconfig.current_hosts())))
 
 
 def print_network(interface, host, subnet, gateway):
-    print("%10s %15s %18s %15s" % (interface, host, subnet, gateway))
+  print("%10s %15s %18s %15s" % (interface, host, subnet, gateway))
 
-def networks(_args):
-  """Dump known local and remote network configs."""
+def local_networks():
   print("Local network configs:")
   print_network("Interface", "Host", "Subnet", "Gateway")
   for interface in network.local_interfaces():
     print_network(interface.name, interface.ip, interface.network, interface.gateway)
 
+def remote_networks():
   print("\nRemote network configs:")
   print_network("Interface", "Host", "Subnet", "Gateway")
   for host in macipsconfig.current_hosts():
@@ -67,6 +73,10 @@ def networks(_args):
       continue
     print_network(interface.name, interface.ip, interface.network, interface.gateway)
 
+def networks(_args):
+  """Dump known local and remote network configs."""
+  local_networks()
+  remote_networks()
 
 def ssh_all_hosts(args):
   """Run args.command on all known hosts.
@@ -91,13 +101,10 @@ def main():
   parser = argparse.ArgumentParser()
   subparsers = parser.add_subparsers()
 
-  subparser = subparsers.add_parser('find')
-  subparser.set_defaults(func=find)
   parser.set_defaults(func=find)
-
-  subparser = subparsers.add_parser('scan')
-  subparser.add_argument('-i', '--interface', help="specify network interface")
-  subparser.set_defaults(func=scan)
+  parser.add_argument('-i', '--interface', help="specify network interface")
+  parser.add_argument('-P', '--progress', help="show ping responses as the arrive",
+                      action='store_true')
 
   subparser = subparsers.add_parser('ping')
   subparser.set_defaults(func=ping)

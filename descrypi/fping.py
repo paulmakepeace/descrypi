@@ -21,7 +21,7 @@ import subprocess
 # The second packet can help if the computer is asleep.
 FPING_COMMAND = "fping --size 40 --count 2 --retry 1 --timeout=50 --interval 1 --generate %s"
 
-def fping(network):
+def fping(network, progress=False):
   """Execute `fping` and return alive hosts.
 
   A ICMP reply (or not) is reported as,
@@ -39,7 +39,8 @@ def fping(network):
     line = line.split()
     ip_address, result = line[0], line[4]
     if result[2] != "0": # rcv'ed something!
-      print("%s is alive" % ip_address)
+      if progress:
+        print("%s is alive" % ip_address)
       alive.append(ip_address)
   return alive
 

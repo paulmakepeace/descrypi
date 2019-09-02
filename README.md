@@ -10,7 +10,7 @@ Currently, it's written in Python 3 with no Python package dependencies, and sho
 
 ### Dependencies
 
-There is an optional external dependency on a common executable though: install `fping`:
+There is an external dependency on a common executable though: install `fping`:
 
 * macOS: `brew install fping`
 * Ubuntu: `sudo apt-get install fping`
@@ -28,35 +28,15 @@ cd descrypi
 
 ## Flow
 
-### Networks
-
-First, figure out what local networks are available on your workstation and so where your Pi(s) are connected. You'll need this to direct your scans for Pi(s).
-
-```shell
-bin/descrypi networks
-```
-
-You're interested in the local networks at this stage. Pick out the name of the hardware interface listed in the first column, e.g. eth0, en0, bridge100, etc.
-
-### Scan
-
-To scan for machines,
-
-```shell
-bin/descrypi scan [-i <interface>]
-```
-
-You don't strictly need to do this if your Pi and workstation have been in communication recently but the network (ARP) cache can expire so this will refresh it.
-
 ### Find
 
-Then to find your Pi(s) run,
+To find your Pi(s) simply run,
 
  ```shell
 bin/descrypi
  ````
 
-This should report newly found Pi(s) and create a database, `mac_ips.json`. Next time you run `bin/descrypi` it'll recognize that MAC-to-IP mapping.
+This will ping every host on each of your workstation's IPv4 interfaces then report any found Pi(s). Those Pi(s) will be stored in a local a (text file) database, `mac_ips.json`. Next time you run `bin/descrypi` it'll recognize that MAC-to-IP mapping.
 
 ### Assign (TODO)
 
@@ -73,6 +53,16 @@ bin/descrypi ping
 ```
 
 ## Other Tools
+
+### Networks
+
+```shell
+bin/descrypi networks
+```
+
+This will show you local (workstation) networks, and remote (Pi) networks.
+
+If you want to restrict your scanning to a particular interface this command can be useful to see what local networks are present and the name of their interface.
 
 ### SSH
 
