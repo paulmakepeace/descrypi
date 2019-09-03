@@ -1,24 +1,24 @@
 # Descry Pi
 
-Find ("descry") freshly installed Raspberry Pi(s) on your network!
+Find Raspberry Pi(s) on your network without connecting a keyboard and monitor, or digging around in DHCP lease tables!
 
-This toolset aims to be easier than using `fing` and, ultimately, more useful.
-
-Currently, it's written in Python 3 with no Python package dependencies, and should work on macOS and Linux.
+Then, using auto-generated inventory files, harness the power of Ansible to setup your cluster.
 
 ## Installation
 
 ### Dependencies
 
-There is an external dependency on a common executable though: install `fping`:
+DescryPi is written in Python 3 with no Python package dependencies, and should work on macOS and Linux.
 
-* macOS: `brew install fping`
-* Ubuntu: `sudo apt-get install fping`
+You'll need Python 3 and `fping`:
+
+* macOS: `brew install python fping`
+* Ubuntu: `sudo apt-get install python3 fping`
 * etc
 
-It also uses `arp` but you almost certainly have that. (If not, it's in the Linux net-tools package.)
+It also uses `arp` but you almost certainly already have that. (If not, it's in the Linux net-tools package.)
 
-### The App
+### Download
 
 ```shell
 git clone git@github.com:paulmakepeace/descrypi.git
@@ -36,23 +36,23 @@ To find your Pi(s) simply run,
 bin/descrypi
  ````
 
-This will ping every host on each of your workstation's IPv4 interfaces then report any found Pi(s). Those Pi(s) will be stored in a local a (text file) database, `mac_ips.json`. Next time you run `bin/descrypi` it'll recognize that MAC-to-IP mapping.
+This will ping every host on each of your workstation's IPv4 interfaces then report any newly found Pi(s). Those Pi(s) will be stored in a local (text file) database, `hosts.json`. Next time you run `bin/descrypi` it'll recognize that MAC-to-IP mapping.
 
 ### Assign (TODO)
 
-Next, if you want to assign a static IP to the machines update the IP addresses in `mac_ips.json`. Running `bin/descrypi` should report that the IP is updated and won't overwrite it.
+Next, if you want to assign a static IP to the machines update the IP addresses in `hosts.json`. Running `bin/descrypi` should report that the IP is updated and won't overwrite it.
 
 A future feature will actually connect to the Pi and assign this address.
 
+## Other Tools
+
 ### Ping
 
-To ping Pi(s) in the `mac_ips.json` database,
+To ping Pi(s) in the `hosts.json` database,
 
 ```shell
 bin/descrypi ping
 ```
-
-## Other Tools
 
 ### Networks
 
@@ -60,7 +60,7 @@ bin/descrypi ping
 bin/descrypi networks
 ```
 
-This will show you local (workstation) networks, and remote (Pi) networks.
+This will show your local (workstation) networks, and remote (Pi) networks.
 
 If you want to restrict your scanning to a particular interface this command can be useful to see what local networks are present and the name of their interface.
 
@@ -81,6 +81,14 @@ bin/descrypi ssh "ls -al"
 ### Check for new MAC prefixes
 
 `bin/descrypi check_ieee_macs` will check whether there are new Raspberry Pi MAC prefixes registered with the [IEEE Registration Authority](https://regauth.standards.ieee.org/standards-ra-web/pub/view.html#registries). Realistically you never need to run this but I included this as it's quite interesting to know that there is a query-able database of Raspberry Pi MAC prefixes :-)
+
+## Ansible
+
+DescryPi writes out an Ansible inventory file `hosts.json`, containing all the discovered Pi(s) grouped under the `pi` hosts group. This opens up the power of Ansible for managing your fleet. As a simple example, the following command will show each Pi's `uptime`,
+
+```shell script
+ansible -i hosts.json -m shell -a uptime pi
+```
 
 ## To Do
 

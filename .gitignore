@@ -102,4 +102,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-mac_ips.json
+
+# Project specific
+hosts.json
