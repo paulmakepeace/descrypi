@@ -54,6 +54,16 @@ To ping Pi(s) in the `hosts.json` database,
 bin/descrypi ping
 ```
 
+### Passwd
+
+Raspberry Pi recommends changing the default password for the `pi` user (from `raspberry`) as soon as you can. It's easy to do it with DescryPi:
+
+```shell script
+bin/descrypi passwd
+```
+
+You can simply hit Return when prompted for the current password if it's still the default `raspberry`.
+
 ### Networks
 
 ```shell

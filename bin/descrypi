@@ -17,6 +17,7 @@ from descrypi import arp
 from descrypi import fping
 from descrypi import ieee_ra
 from descrypi import network
+from descrypi import passwd
 from descrypi import macipsconfig
 from descrypi.ssh import ssh
 
@@ -86,6 +87,8 @@ def ssh_all_hosts(args):
   for host in macipsconfig.current_hosts():
     print(re.sub(r"^", "[%s] " % host, ssh(host, args.command), flags=re.MULTILINE))
 
+def change_password(args):
+  passwd.change_password(macipsconfig.current_hosts())
 
 def check_ieee_macs(_args):
   """Check that the Raspberry Pi folks haven't registered another MAC prefix."""
@@ -115,6 +118,9 @@ def main():
   subparser = subparsers.add_parser('ssh')
   subparser.add_argument('command', nargs='*')
   subparser.set_defaults(func=ssh_all_hosts)
+
+  subparser = subparsers.add_parser('passwd')
+  subparser.set_defaults(func=change_password)
 
   subparser = subparsers.add_parser('check_ieee_macs')
   subparser.set_defaults(func=check_ieee_macs)
