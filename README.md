@@ -16,7 +16,7 @@ You'll need Python 3 and `fping`:
 * Ubuntu: `sudo apt-get install python3 fping`
 * etc
 
-It also uses `arp` but you almost certainly already have that. (If not, it's in the Linux net-tools package.)
+It also uses `arp` and `ssh-copy-id` but you almost certainly already have those. (If not, `arp` is in the Linux net-tools package and `ssh-copy-id` is in `openssh-client`.)
 
 ### Download
 
@@ -54,6 +54,18 @@ To ping Pi(s) in the `hosts.json` database,
 bin/descrypi ping
 ```
 
+### Copy SSH Keys
+
+Enable password-less login using [`ssh-copy-id`](https://www.ssh.com/ssh/copy-id):
+
+```shell script
+bin/descrypi ssh-copy-id
+```
+
+This will prompt for the existing password. You can simply hit Return if it's still the default installed `raspberry`.
+
+Note: if you're asked for the password again (e.g. `pi@192.168.2.65's password:`) then it means the given password was rejected; try again with the correct password.
+
 ### Passwd
 
 Raspberry Pi recommends changing the default password for the `pi` user (from `raspberry`) as soon as you can. It's easy to do it with DescryPi:
@@ -62,7 +74,7 @@ Raspberry Pi recommends changing the default password for the `pi` user (from `r
 bin/descrypi passwd
 ```
 
-You can simply hit Return when prompted for the current password if it's still the default `raspberry`.
+As for `ssh-copy-id`, you can hit Return to accept the default `raspberry` password.
 
 ### Networks
 

@@ -8,7 +8,6 @@ Find Raspberry Pis on the network by examining `arp` responses.
 
 import argparse
 import re
-import shutil
 import sys
 
 import executable # tweak sys.path to find descrypi module
@@ -19,7 +18,9 @@ from descrypi import ieee_ra
 from descrypi import network
 from descrypi import passwd
 from descrypi import macipsconfig
+from descrypi import run
 from descrypi.ssh import ssh
+from descrypi import copy_ssh_keys
 
 def find(args):
   """Main entry point for descrypi: find Pi(s)!
@@ -44,15 +45,14 @@ def find(args):
 
 def scan(interface, progress=False):
   """fping the interface and report 'up' hosts."""
-  if not shutil.which("fping"):
-    sys.stderr.write("Missing `fping`. Try `brew install fping`, `apt-get install fping`, etc\n")
-    sys.exit(1)
+  run.ensure_executable("fping")
   for i in network.local_interfaces(interface):
     print("Pinging %s (%s) ..." % (i.name, i.network))
     fping.fping(i.network, progress=progress)
 
 def ping(_args):
   """fping the known Pi hosts and report who's 'up'."""
+  run.ensure_executable("fping")
   print("Pinging: ", ", ".join(fping.ping(macipsconfig.current_hosts())))
 
 
@@ -87,8 +87,12 @@ def ssh_all_hosts(args):
   for host in macipsconfig.current_hosts():
     print(re.sub(r"^", "[%s] " % host, ssh(host, args.command), flags=re.MULTILINE))
 
-def change_password(args):
+def change_password(_args):
   passwd.change_password(macipsconfig.current_hosts())
+
+def ssh_copy_id(_args):
+  run.ensure_executable("ssh-copy-id", apt_package="openssh-client")
+  copy_ssh_keys.ssh_copy_id(macipsconfig.current_hosts())
 
 def check_ieee_macs(_args):
   """Check that the Raspberry Pi folks haven't registered another MAC prefix."""
@@ -121,6 +125,9 @@ def main():
 
   subparser = subparsers.add_parser('passwd')
   subparser.set_defaults(func=change_password)
+
+  subparser = subparsers.add_parser('ssh-copy-id')
+  subparser.set_defaults(func=ssh_copy_id)
 
   subparser = subparsers.add_parser('check_ieee_macs')
   subparser.set_defaults(func=check_ieee_macs)

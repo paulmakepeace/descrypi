@@ -72,7 +72,7 @@ class MACIPsConfig:
 
   def current_hosts(self):
     """Return a list of current hosts."""
-    return self.hosts().keys()
+    return list(self.hosts().keys())
 
 def current_hosts():
   """Shortcut to return all known hosts."""
