@@ -1,8 +1,16 @@
 # Descry Pi
 
-Find Pi(s) on your network without connecting a keyboard and monitor, or digging around in DHCP lease tables!
+Find [headless](https://en.wikipedia.org/wiki/Headless_computer) Pi(s) on your network without connecting a keyboard and monitor, or digging around in DHCP lease tables!
 
-Then, using auto-generated inventory files, harness the power of Ansible to setup your cluster.
+In addition to scanning, `descrypi` can perform operations on all Pi hosts,
+
+* check they're up (ping)
+* copy SSH keys
+* change default passwords
+* show local and remote network configurations
+* run arbitrary commands remotely using `ssh`
+
+Not only that, `descrypi` will create an [inventory file](https://docs.ansible.com/ansible/latest/network/getting_started/first_inventory.html) so you can harness the power of [Ansible](https://docs.ansible.com/ansible/latest/index.html) to continue setting up your cluster.
 
 It currently works with [Raspberry Pi](https://www.raspberrypi.org) (fully) and [Rock Pi](http://rockpi.org) (partially).
 
@@ -70,6 +78,8 @@ Note: if you're asked for the password again (e.g. `pi@192.168.2.65's password:`
 
 ### Passwd
 
+*Note: Raspberry Pi only*
+
 Raspberry Pi recommends changing the default password for the `pi` user (from `raspberry`) as soon as you can. It's easy to do it with DescryPi:
 
 ```shell script
@@ -104,6 +114,8 @@ bin/descrypi ssh "ls -al"
 
 ### Check for new MAC prefixes
 
+*Note: Raspberry Pi only*
+
 `bin/descrypi check_ieee_macs` will check whether there are new Raspberry Pi MAC prefixes registered with the [IEEE Registration Authority](https://regauth.standards.ieee.org/standards-ra-web/pub/view.html#registries). Realistically you never need to run this but I included this as it's quite interesting to know that there is a query-able database of Raspberry Pi MAC prefixes :-)
 
 ## Ansible
@@ -116,6 +128,7 @@ ansible -i hosts.json -m shell -a uptime pi
 
 ## To Do
 
+* While the [Raspberry Pi's OS, Raspbian](https://www.raspberrypi.org/downloads/raspbian/) has a default user and password to login, [Armbian](https://www.armbian.com), which is used on many other Pi-alikes, insists on changing the root password as first order of business. `descrypi` doesn't support this yet.
 * Use the existing database to actually assign static IPs
 * Ping the database in succession to identify the machines by MAC (blinkenlights)
 
