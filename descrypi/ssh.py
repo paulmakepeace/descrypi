@@ -8,6 +8,7 @@ DEFAULT_SSH_USER = "pi"
 SSH_COMMAND = ["ssh", "-T", "-o", "StrictHostKeyChecking=no"]
 
 def ssh_user_host(host):
+  """Return e.g. pi@192.168.1.2"""
   return DEFAULT_SSH_USER + "@" + host
 
 def ssh(host, command, stdin=None):
