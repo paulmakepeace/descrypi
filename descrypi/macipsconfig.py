@@ -58,15 +58,15 @@ class MACIPsConfig:
     """
     changes = []
     hosts = self.hosts()
-    for mac, ip in mac_ips:
+    for mac, ip, model in mac_ips:
       if ip in hosts:
         new = False
         assigned = hosts[ip]['assigned'] != self.IP_NOT_SET and hosts[ip]['assigned']
       else:
         new, assigned = True, False
-      changes.append((mac, ip, new, assigned))
+      changes.append((mac, ip, model, new, assigned))
       if not assigned:
-        hosts[ip] = {'mac': mac, 'assigned': self.IP_NOT_SET}
+        hosts[ip] = {'mac': mac, 'model': model, 'assigned': self.IP_NOT_SET}
     self.dump()
     return changes
 

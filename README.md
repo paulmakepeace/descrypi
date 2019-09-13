@@ -1,8 +1,10 @@
 # Descry Pi
 
-Find Raspberry Pi(s) on your network without connecting a keyboard and monitor, or digging around in DHCP lease tables!
+Find Pi(s) on your network without connecting a keyboard and monitor, or digging around in DHCP lease tables!
 
 Then, using auto-generated inventory files, harness the power of Ansible to setup your cluster.
+
+It currently works with [Raspberry Pi](https://www.raspberrypi.org) (fully) and [Rock Pi](http://rockpi.org) (partially).
 
 ## Installation
 

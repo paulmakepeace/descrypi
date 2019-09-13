@@ -8,7 +8,6 @@ Find Raspberry Pis on the network by examining `arp` responses.
 
 import argparse
 import re
-import sys
 
 import executable # tweak sys.path to find descrypi module
 
@@ -34,10 +33,10 @@ def find(args):
   changes = mac_ip_config.record(mac_ips)
 
   if changes:
-    print("Found these Pi(s):")
-    for mac, ip, new, assigned in changes:
-      print("%15s %19s %s%s" % (
-          ip, '(' + mac + ')',
+    print("\nFound these Pi(s):")
+    for mac, ip, model, new, assigned in changes:
+      print("%-15s %-19s %-15s %s%s" % (
+          ip, mac, '(' + model + ')',
           ("(new!) " if new else ""),
           ("assigned to %s!" % assigned if assigned else "")))
   else:
