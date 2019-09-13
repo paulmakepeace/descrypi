@@ -132,6 +132,12 @@ ansible -i hosts.json -m shell -a uptime pi
 * Use the existing database to actually assign static IPs
 * Ping the database in succession to identify the machines by MAC (blinkenlights)
 
+## More
+
+I've written some brief notes on [installing images](docs/Images.md) to an SD card.
+
+Descry? [Detect, dig out, discover, dredge up, ...](https://www.merriam-webster.com/dictionary/descry)
+
 ## Author
 
 Paul Makepeace, 2019
