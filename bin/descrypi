@@ -46,13 +46,14 @@ def scan(interface, progress=False):
   """fping the interface and report 'up' hosts."""
   run.ensure_executable("fping")
   for i in network.local_interfaces(interface):
-    print("Pinging %s (%s) ..." % (i.name, i.network))
+    print("Pinging %s (%s) ..." % (i.name, i.network), flush=True)
     fping.fping(i.network, progress=progress)
 
 def ping(_args):
   """fping the known Pi hosts and report who's 'up'."""
   run.ensure_executable("fping")
-  print("Pinging: ", ", ".join(fping.ping(macipsconfig.current_hosts())))
+  print("Pinging: ", end="", flush=True)
+  print(", ".join(fping.ping(macipsconfig.current_hosts())))
 
 
 def print_network(interface, host, subnet, gateway):
@@ -105,34 +106,40 @@ def check_ieee_macs(_args):
 def main():
   """Main."""
   parser = argparse.ArgumentParser()
-  subparsers = parser.add_subparsers()
-
-  parser.set_defaults(func=find)
+  subparsers = parser.add_subparsers(title='Commands', dest='subparser_name')
   parser.add_argument('-i', '--interface', help="specify network interface")
   parser.add_argument('-P', '--progress', help="show ping responses as the arrive",
                       action='store_true')
 
-  subparser = subparsers.add_parser('ping')
+  subparser = subparsers.add_parser('help')
+
+  subparser = subparsers.add_parser('find', help='Find Pi(s)!')
+  subparser.set_defaults(func=find)
+
+  subparser = subparsers.add_parser('ping', help="fping the known Pi hosts and report who's 'up'")
   subparser.set_defaults(func=ping)
 
-  subparser = subparsers.add_parser('networks')
+  subparser = subparsers.add_parser('networks', help='Dump known local and remote network configs')
   subparser.set_defaults(func=networks)
 
-  subparser = subparsers.add_parser('ssh')
-  subparser.add_argument('command', nargs='*')
+  subparser = subparsers.add_parser('ssh', help='Run commands on all known hosts')
+  subparser.add_argument('command', nargs='*', help='e.g. /bin/ls')
   subparser.set_defaults(func=ssh_all_hosts)
 
-  subparser = subparsers.add_parser('passwd')
+  subparser = subparsers.add_parser('passwd', help="Update user's password on each host using `passwd`")
   subparser.set_defaults(func=change_password)
 
-  subparser = subparsers.add_parser('ssh-copy-id')
+  subparser = subparsers.add_parser('ssh-copy-id', help='Copy SSH keys to all known hosts using `ssh-copy-id`')
   subparser.set_defaults(func=ssh_copy_id)
 
-  subparser = subparsers.add_parser('check_ieee_macs')
+  subparser = subparsers.add_parser('check_ieee_macs', help='[Advanced] Verify no new RPi MAC prefixes')
   subparser.set_defaults(func=check_ieee_macs)
 
   args = parser.parse_args()
-  args.func(args)  # call the default function
+  if args.subparser_name is None or args.subparser_name == 'help':
+    parser.print_help()
+  else:
+    args.func(args)
 
 
 if __name__ == '__main__':
