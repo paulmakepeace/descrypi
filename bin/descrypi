@@ -9,7 +9,7 @@ Find Raspberry Pis on the network by examining `arp` responses.
 import argparse
 import re
 
-import executable # tweak sys.path to find descrypi module
+import executable  # tweak sys.path to find descrypi module
 
 from descrypi import arp
 from descrypi import fping
@@ -21,126 +21,163 @@ from descrypi import run
 from descrypi.ssh import ssh
 from descrypi import copy_ssh_keys
 
+
 def find(args):
-  """Main entry point for descrypi: find Pi(s)!
+    """Main entry point for descrypi: find Pi(s)!
 
-  This scans all local IPv4 networks, then examines the ARP table looking for Pi(s)."""
+    This scans all local IPv4 networks, then examines the ARP table looking for Pi(s)."""
 
-  scan(args.interface, args.progress)
+    scan(args.interface, args.progress)
 
-  mac_ip_config = macipsconfig.MACIPsConfig()
-  mac_ips = arp.find_pi_mac_ips()
-  changes = mac_ip_config.record(mac_ips)
+    mac_ip_config = macipsconfig.MACIPsConfig()
+    mac_ips = arp.find_pi_mac_ips()
+    changes = mac_ip_config.record(mac_ips)
 
-  if changes:
-    print("\nFound these Pi(s):")
-    for mac, ip, model, new, assigned in changes:
-      print("%-15s %-19s %-15s %s%s" % (
-          ip, mac, '(' + model + ')',
-          ("(new!) " if new else ""),
-          ("assigned to %s!" % assigned if assigned else "")))
-  else:
-    print("No Pi(s) found.")
+    if changes:
+        print("\nFound these Pi(s):")
+        for mac, ip, model, new, assigned in changes:
+            print(
+                "%-15s %-19s %-15s %s%s"
+                % (
+                    ip,
+                    mac,
+                    "(" + model + ")",
+                    ("(new!) " if new else ""),
+                    ("assigned to %s!" % assigned if assigned else ""),
+                )
+            )
+    else:
+        print("No Pi(s) found.")
+
 
 def scan(interface, progress=False):
-  """fping the interface and report 'up' hosts."""
-  run.ensure_executable("fping")
-  for i in network.local_interfaces(interface):
-    print("Pinging %s (%s) ..." % (i.name, i.network), flush=True)
-    fping.fping(i.network, progress=progress)
+    """fping the interface and report 'up' hosts."""
+    run.ensure_executable("fping")
+    for i in network.local_interfaces(interface):
+        print("Pinging %s (%s) ..." % (i.name, i.network), flush=True)
+        fping.fping(i.network, progress=progress)
+
 
 def ping(_args):
-  """fping the known Pi hosts and report who's 'up'."""
-  run.ensure_executable("fping")
-  print("Pinging: ", end="", flush=True)
-  print(", ".join(fping.ping(macipsconfig.current_hosts())))
+    """fping the known Pi hosts and report who's 'up'."""
+    run.ensure_executable("fping")
+    print("Pinging: ", end="", flush=True)
+    print(", ".join(fping.ping(macipsconfig.current_hosts())))
 
 
 def print_network(interface, host, subnet, gateway):
-  print("%10s %15s %18s %15s" % (interface, host, subnet, gateway))
+    print("%10s %15s %18s %15s" % (interface, host, subnet, gateway))
+
 
 def local_networks():
-  print("Local network configs:")
-  print_network("Interface", "Host", "Subnet", "Gateway")
-  for interface in network.local_interfaces():
-    print_network(interface.name, interface.ip, interface.network, interface.gateway)
+    print("Local network configs:")
+    print_network("Interface", "Host", "Subnet", "Gateway")
+    for interface in network.local_interfaces():
+        print_network(
+            interface.name, interface.ip, interface.network, interface.gateway
+        )
+
 
 def remote_networks():
-  print("\nRemote network configs:")
-  print_network("Interface", "Host", "Subnet", "Gateway")
-  for host in macipsconfig.current_hosts():
-    interface = network.remote_interface(host)
-    if interface is None:
-      continue
-    print_network(interface.name, interface.ip, interface.network, interface.gateway)
+    print("\nRemote network configs:")
+    print_network("Interface", "Host", "Subnet", "Gateway")
+    for host in macipsconfig.current_hosts():
+        interface = network.remote_interface(host)
+        if interface is None:
+            continue
+        print_network(
+            interface.name, interface.ip, interface.network, interface.gateway
+        )
+
 
 def networks(_args):
-  """Dump known local and remote network configs."""
-  local_networks()
-  remote_networks()
+    """Dump known local and remote network configs."""
+    local_networks()
+    remote_networks()
+
 
 def ssh_all_hosts(args):
-  """Run args.command on all known hosts.
+    """Run args.command on all known hosts.
 
-  To avoid this program attempting to parse flags you'll need to quote e.g. ssh "ls -l"
-  """
-  for host in macipsconfig.current_hosts():
-    print(re.sub(r"^", "[%s] " % host, ssh(host, args.command), flags=re.MULTILINE))
+    To avoid this program attempting to parse flags you'll need to quote e.g. ssh "ls -l"
+    """
+    for host in macipsconfig.current_hosts():
+        print(re.sub(r"^", "[%s] " % host, ssh(host, args.command), flags=re.MULTILINE))
+
 
 def change_password(_args):
-  passwd.change_password(macipsconfig.current_hosts())
+    passwd.change_password(macipsconfig.current_hosts())
+
 
 def ssh_copy_id(_args):
-  run.ensure_executable("ssh-copy-id", apt_package="openssh-client")
-  copy_ssh_keys.ssh_copy_id(macipsconfig.current_hosts())
+    run.ensure_executable("ssh-copy-id", apt_package="openssh-client")
+    copy_ssh_keys.ssh_copy_id(macipsconfig.current_hosts())
+
 
 def check_ieee_macs(_args):
-  """Check that the Raspberry Pi folks haven't registered another MAC prefix."""
-  changes = ieee_ra.check_ieee_macs()
-  if not changes:
-    print("Raspberry Pi MAC prefixes up-to-date!")
-  else:
-    print("Raspberry Pi MAC prefixes have changed to %s! Please file an issue." % changes)
+    """Check that the Raspberry Pi folks haven't registered another MAC prefix."""
+    changes = ieee_ra.check_ieee_macs()
+    if not changes:
+        print("Raspberry Pi MAC prefixes up-to-date!")
+    else:
+        print(
+            "Raspberry Pi MAC prefixes have changed to %s! Please file an issue."
+            % changes
+        )
 
 
 def main():
-  """Main."""
-  parser = argparse.ArgumentParser()
-  subparsers = parser.add_subparsers(title='Commands', dest='subparser_name')
-  parser.add_argument('-i', '--interface', help="specify network interface")
-  parser.add_argument('-P', '--progress', help="show ping responses as the arrive",
-                      action='store_true')
+    """Main."""
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(title="Commands", dest="subparser_name")
+    parser.add_argument("-i", "--interface", help="specify network interface")
+    parser.add_argument(
+        "-P",
+        "--progress",
+        help="show ping responses as the arrive",
+        action="store_true",
+    )
 
-  subparser = subparsers.add_parser('help')
+    subparser = subparsers.add_parser("help")
 
-  subparser = subparsers.add_parser('find', help='Find Pi(s)!')
-  subparser.set_defaults(func=find)
+    subparser = subparsers.add_parser("find", help="Find Pi(s)!")
+    subparser.set_defaults(func=find)
 
-  subparser = subparsers.add_parser('ping', help="fping the known Pi hosts and report who's 'up'")
-  subparser.set_defaults(func=ping)
+    subparser = subparsers.add_parser(
+        "ping", help="fping the known Pi hosts and report who's 'up'"
+    )
+    subparser.set_defaults(func=ping)
 
-  subparser = subparsers.add_parser('networks', help='Dump known local and remote network configs')
-  subparser.set_defaults(func=networks)
+    subparser = subparsers.add_parser(
+        "networks", help="Dump known local and remote network configs"
+    )
+    subparser.set_defaults(func=networks)
 
-  subparser = subparsers.add_parser('ssh', help='Run commands on all known hosts')
-  subparser.add_argument('command', nargs='*', help='e.g. /bin/ls')
-  subparser.set_defaults(func=ssh_all_hosts)
+    subparser = subparsers.add_parser("ssh", help="Run commands on all known hosts")
+    subparser.add_argument("command", nargs="*", help="e.g. /bin/ls")
+    subparser.set_defaults(func=ssh_all_hosts)
 
-  subparser = subparsers.add_parser('passwd', help="Update user's password on each host using `passwd`")
-  subparser.set_defaults(func=change_password)
+    subparser = subparsers.add_parser(
+        "passwd", help="Update user's password on each host using `passwd`"
+    )
+    subparser.set_defaults(func=change_password)
 
-  subparser = subparsers.add_parser('ssh-copy-id', help='Copy SSH keys to all known hosts using `ssh-copy-id`')
-  subparser.set_defaults(func=ssh_copy_id)
+    subparser = subparsers.add_parser(
+        "ssh-copy-id", help="Copy SSH keys to all known hosts using `ssh-copy-id`"
+    )
+    subparser.set_defaults(func=ssh_copy_id)
 
-  subparser = subparsers.add_parser('check_ieee_macs', help='[Advanced] Verify no new RPi MAC prefixes')
-  subparser.set_defaults(func=check_ieee_macs)
+    subparser = subparsers.add_parser(
+        "check_ieee_macs", help="[Advanced] Verify no new RPi MAC prefixes"
+    )
+    subparser.set_defaults(func=check_ieee_macs)
 
-  args = parser.parse_args()
-  if args.subparser_name is None or args.subparser_name == 'help':
-    parser.print_help()
-  else:
-    args.func(args)
+    args = parser.parse_args()
+    if args.subparser_name is None or args.subparser_name == "help":
+        parser.print_help()
+    else:
+        args.func(args)
 
 
-if __name__ == '__main__':
-  main()
+if __name__ == "__main__":
+    main()
