@@ -43,7 +43,9 @@ class Interface:
     # Linux: inet 169.254.46.250  netmask 255.255.0.0  broadcast 169.254.255.255
     # macOS: inet 169.254.201.244 netmask 0xffff0000 broadcast 169.254.255.255
     IFCONFIG_INET_RE = re.compile(
-        r"inet (?P<ip>\S+)\s+netmask\s+(?P<netmask>\S+)\s+broadcast\s+(?P<broadcast>\S+)"
+        r"inet (?P<ip>\S+)\s+"
+        r"netmask\s+(?P<netmask>\S+)\s+"
+        r"broadcast\s+(?P<broadcast>\S+)"
     )
 
     def ifconfig(self, ifconfig):
@@ -54,7 +56,7 @@ class Interface:
             if netmask[0:2] == "0x":
                 netmask = bin(int(netmask, 16)).count("1")
             self.network = str(
-                ipaddress.IPv4Network("%s/%s" % (broadcast, netmask), strict=False)
+                ipaddress.IPv4Network(f"{broadcast}/{netmask}", strict=False)
             )
         return self
 
@@ -91,9 +93,8 @@ class Interface:
         if match:
             if match.group("ip") != host:
                 sys.stderr.write(
-                    "Found surprise host %s in `ip route` (expected %s)\n",
-                    match.group("ip"),
-                    host,
+                    f"Found surprise host {match.group('ip')} in `ip route` "
+                    f"(expected {host})\n"
                 )
             else:
                 gateway, interface, ip = (
@@ -102,7 +103,7 @@ class Interface:
                     match.group("ip"),
                 )
                 if gateway is None:
-                    sys.stderr.write("Host %s appears to be missing a gateway\n" % host)
+                    sys.stderr.write(f"Host {host} appears to be missing a gateway\n")
         match = cls.IP_SUBNET_RE.search(ip_route)
         if match:
             if match.group("interface") != interface or match.group("ip") != ip:
@@ -129,7 +130,7 @@ def local_interfaces(interface=None):
     command = ["ifconfig"]
     if interface is not None:
         command.append(interface)
-    response = subprocess.Popen(
+    with subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-    ).stdout
-    return Interface.from_ifconfigs(response.read().decode())
+    ) as process:
+        return Interface.from_ifconfigs(process.stdout.read().decode())

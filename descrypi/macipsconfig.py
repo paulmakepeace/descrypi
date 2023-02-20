@@ -7,12 +7,12 @@ import json
 class MACIPsConfig:
     """Hosts database.
 
-    This class maintains a file of the IP -> MAC mappings between runs. Once a MAC is found,
-    its IP is recorded. It's then possible to assign a specific IP address for later assignment on the
-    machine.
+    This class maintains a file of the IP -> MAC mappings between runs. Once a
+    MAC is found, its IP is recorded. It's then possible to assign a specific IP
+    address for later assignment on the machine.
 
-    The format is the same as the Ansible inventory file so it can be used to drive more
-    sophisticated automation using Ansible.
+    The format is the same as the Ansible inventory file so it can be used to
+    drive more sophisticated automation using Ansible.
     """
 
     ANSIBLE_INVENTORY_FILE = "hosts.json"
@@ -38,14 +38,15 @@ class MACIPsConfig:
 
     def dump(self):
         """Write out the database."""
-        with open(self.file, "w") as f:
+        with open(self.file, "w", encoding="utf-8") as f:
             json.dump(self.config, f, indent=4)
 
     def load(self):
         """Load JSON MAC -> IP assignments."""
         if not os.path.exists(self.file):
             self.dump()
-        self.config = json.load(open(self.file))
+        with open(self.file, encoding="utf-8") as f:
+            self.config = json.load(f)
 
     def hosts(self):
         """Return the actual hosts part of the inventory data structure."""
@@ -54,8 +55,9 @@ class MACIPsConfig:
     def record(self, mac_ips):
         """Record the latest scan with the existing database.
 
-        Return a list of changes where 'new' is previously unseen MAC and 'assigned' is if the existing
-        database has a manually assigned IP. In this case, we don't update the database.
+        Return a list of changes where 'new' is previously unseen MAC and
+        'assigned' is if the existing database has a manually assigned IP. In
+        this case, we don't update the database.
         """
         changes = []
         hosts = self.hosts()

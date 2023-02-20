@@ -23,26 +23,25 @@ MAC_PREFIX_RE = "|".join(descrypi.ieee_ra.MAC_PREFIXES)
 MAC_OCTET_TRIPLE_RE = ":".join([r"[0-9a-f]{1,2}"] * 3)
 # Regex to extract IP, MAC, and its prefix from an `arp -a` line
 MACS_RE = re.compile(
-    r"""
+    rf"""
                     ^\S+[ ]
                     \((?P<ip>[^)]+)\)
                     [ ]at[ ]
-                    (?P<mac>(?P<prefix>{prefix}):(?:{rest}))
-                    """.format(
-        prefix=MAC_PREFIX_RE, rest=MAC_OCTET_TRIPLE_RE
-    ),
+                    (?P<mac>(?P<prefix>{MAC_PREFIX_RE}):(?:{MAC_OCTET_TRIPLE_RE}))
+                    """,
     re.MULTILINE | re.IGNORECASE | re.VERBOSE,
 )
 
 
 def find_pi_mac_ips():
     """Run `arp -a` and return array of (Pi MAC address, IP) tuples."""
-    arp = subprocess.Popen(ARP_COMMAND, stdout=subprocess.PIPE).stdout.read().decode()
-    return [
-        (
-            m.group("mac"),
-            m.group("ip"),
-            descrypi.ieee_ra.model_by_mac_prefix(m.group("prefix")),
-        )
-        for m in MACS_RE.finditer(arp)
-    ]
+    with subprocess.Popen(ARP_COMMAND, stdout=subprocess.PIPE) as process:
+        arp = process.stdout.read().decode()
+        return [
+            (
+                m.group("mac"),
+                m.group("ip"),
+                descrypi.ieee_ra.model_by_mac_prefix(m.group("prefix")),
+            )
+            for m in MACS_RE.finditer(arp)
+        ]

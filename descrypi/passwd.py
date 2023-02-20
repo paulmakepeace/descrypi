@@ -13,7 +13,7 @@ from descrypi.ssh import DEFAULT_SSH_USER
 
 def change_password(hosts):
     """Update user's password on each host using `passwd`."""
-    print("Changing password for %s." % DEFAULT_SSH_USER)
+    print(f"Changing password for {DEFAULT_SSH_USER}.")
     current_password = (
         getpass("Current password (<Return> for default): ") or "raspberry"
     )
@@ -22,8 +22,8 @@ def change_password(hosts):
     if new_password != new_password2:
         sys.stderr.write("Sorry, passwords do not match.\n")
         sys.exit(1)
-    passwd_stdin = "%s\n%s\n%s\n" % (current_password, new_password, new_password)
+    passwd_stdin = f"{current_password}\n{new_password}\n{new_password}\n"
     for host in hosts:
-        print("Changing password on %s ..." % host)
+        print(f"Changing password on {host} ...")
         if ssh(host, ["/usr/bin/passwd"], stdin=passwd_stdin):
             print("passwd: password updated successfully!")

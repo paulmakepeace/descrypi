@@ -14,26 +14,26 @@ def ensure_executable(app, brew_package=None, apt_package=None):
         if apt_package is None:
             apt_package = app
         sys.stderr.write(
-            "Missing `%s`. Try `brew install %s`, `apt-get install %s`, etc\n"
-            % (app, brew_package, apt_package)
+            f"Missing `{app}`. Try `brew install {brew_package}`, "
+            f"`apt-get install {apt_package}`, etc\n"
         )
         sys.exit(1)
 
 
 def run(command, stdin=None):
     """Takes an a 'command' (array) and runs it with optional stdin."""
-    process = subprocess.Popen(
+    with subprocess.Popen(
         command,
         stdin=(subprocess.PIPE if stdin else None),
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-    )
-    if stdin:
-        with process.stdin as f:
-            f.write(stdin.encode())
-    output = process.stdout.read().decode()
-    process.wait()
-    if process.returncode != 0:
-        sys.stderr.write("Failed: " + output)
-        return None
-    return output
+    ) as process:
+        if stdin:
+            with process.stdin as f:
+                f.write(stdin.encode())
+        output = process.stdout.read().decode()
+        process.wait()
+        if process.returncode != 0:
+            sys.stderr.write("Failed: " + output)
+            return None
+        return output

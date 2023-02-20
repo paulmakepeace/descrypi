@@ -33,31 +33,32 @@ def fping(network, progress=False):
     """
 
     command = (FPING_COMMAND % network).split()
-    response = subprocess.Popen(
+    with subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-    ).stdout.readlines()
+    ).stdout as stdout:
+        lines = stdout.readlines()
     alive = []
-    for line in (line.decode() for line in response):
+    for line in (line.decode() for line in lines):
         if "rcv" not in line:
             continue
         line = line.split()
         ip_address, result = line[0], line[4]
         if result[2] != "0":  # rcv'ed something!
             if progress:
-                print("%s is alive" % ip_address)
+                print(f"{ip_address} is alive")
             alive.append(ip_address)
     return alive
 
 
 def ping(hosts):
     """Ping 'hosts' using fping."""
-    process = subprocess.Popen(
+    with subprocess.Popen(
         ["fping"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-    )
-    with process.stdin as f:
-        f.write("\n".join(hosts).encode())
-    lines = (line.decode() for line in process.stdout.readlines())
+    ) as process:
+        with process.stdin as f:
+            f.write("\n".join(hosts).encode())
+        lines = (line.decode() for line in process.stdout.readlines())
     return (line.split()[0] for line in lines if "is alive" in line)
