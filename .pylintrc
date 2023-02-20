@@ -1,6 +1,5 @@
 [FORMAT]
 
-max-line-length=100
-indent-string='  '
-no-space-check=trailing-comma,dict-separator
+max-line-length=88
+indent-string='    '
 good-names=i,j,f,ip
