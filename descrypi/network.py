@@ -104,12 +104,12 @@ class Interface:
                 )
                 if gateway is None:
                     sys.stderr.write(f"Host {host} appears to be missing a gateway\n")
-        match = cls.IP_SUBNET_RE.search(ip_route)
-        if match:
-            if match.group("interface") != interface or match.group("ip") != ip:
-                sys.stderr.write("Mismatch on interface and/or IP; check `ip route`\n")
-                sys.exit(1)
-            subnet = match.group("subnet")
+        for match in cls.IP_SUBNET_RE.finditer(ip_route):
+            if match.group("interface") == interface and match.group("ip") == ip:
+                subnet = match.group("subnet")
+        if not subnet:
+            sys.stderr.write(f"Couldn't find {interface} and {ip} in remote `ip route`\n")
+            sys.exit(1)
 
         return cls(interface, ip=host, network=subnet, gateway=gateway)
 
